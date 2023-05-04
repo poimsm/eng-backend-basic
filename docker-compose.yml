@@ -1,0 +1,55 @@
+version: '3.7'
+
+services:
+  django_gunicorn:
+    container_name: eng_django
+    volumes:
+      - static:/static
+      - media:/app/media
+      - ./backend:/app
+    env_file:
+      - .env
+    build:
+      context: .
+    ports:
+      - "8100:8000"
+    networks:
+      - nginx_network
+    depends_on:
+      - postgres
+
+  nginx:
+    container_name: eng_nginx
+    build: ./nginx
+    volumes:
+      - static:/static
+      - media:/media
+    ports:
+      - "80:80"
+    depends_on:
+      - django_gunicorn
+    networks:
+      - nginx_network
+
+  postgres:
+    image: postgres:14.4-bullseye
+    container_name: eng_postgres
+    networks:
+      - nginx_network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+    ports:
+      - "5435:5432"
+
+volumes:
+  static:
+  media:
+  postgres_data:
+
+networks:
+  nginx_network:
+    driver: bridge
