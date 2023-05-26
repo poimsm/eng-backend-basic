@@ -1,11 +1,12 @@
 from django.core.management.base import BaseCommand
 from django.conf import settings
-import os
 from os import listdir
 from os.path import isfile, join
+from api.helpers import console, read_JSON_file, make_prefix
+import traceback
 
 from api.models import (
-    Word, Category
+    Word
 )
 
 class Command(BaseCommand):
@@ -13,52 +14,60 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
 
-        print('--------------------------------')
-        print('      POPULATE WORDS            ')
-        print('--------------------------------')
+        console.info('--------------------------------')
+        console.info('      POPULATE WORDS            ')
+        console.info('--------------------------------')
         
         try:
-            path = 'data/categories/in_use'        
-            categories = [f for f in listdir(path) if isfile(join(path, f))]           
+            word_dir = 'data/words'
+            word_file_names = [f for f in listdir(word_dir) if isfile(join(word_dir, f))]
 
-            print('Reading all words per category...')
+            console.info(f'Reading {len(word_file_names)} words...')
             
-            for cat in categories:
+            for file_name in word_file_names:
+                wordJSON = read_JSON_file(f'{word_dir}/{file_name}')               
+
+                folder = 'words/' + make_prefix(wordJSON['id'])
+                media = f'{settings.SITE_DOMAIN}/media'
+
+                miniature = wordJSON['miniature']
+                miniature['image_url'] = f"{media}/{folder}/mini.png"
                 
-                file = open(os.path.join(settings.BASE_DIR,
-                            'data/categories/in_use/' + cat))
-                words = []
-                for line in file.readlines():
-                    word = line.strip()
-                    if word != '':
-                        words.append(word.lower())
-                file.close()
+                examples = []
+                for i, ex in enumerate(wordJSON['examples']):
+                    exam = ex
+                    exam['voice_url'] = f'{media}/{folder}/ex_0{i + 1}.mp3'
+                    examples.append(exam)
 
-                category_obj = Category.objects.first(name=cat.replace('.txt', ''))
+                explanations = []
+                for i, expl in enumerate(wordJSON['explanations']):
+                    explan = expl
+                    if 'image' in expl:
+                        explan['image'] = f"{media}/{folder}/ex_{expl['image']}"
+                    explanations.append(explan)
 
-                for word in set(words):
-                    word_obj, _ = Word.objects.get_or_create(
-                        word=word,
-                        in_use=False,
-                    )
-                    # word_obj = Word.objects.create(word=word, in_use=False)
-                    # word_obj.save()
-                    # saved_id = word_obj.id
+                story = None
+                if wordJSON['story']:
+                    story = wordJSON['story']
+                    story['voice_url']  = f'{media}/{folder}/story.mp3'
+                    story['image']      = f'{media}/{folder}/story.png'
+                    story['cover']      = f'{media}/{folder}/story_cover.png'
 
-                    word_obj.categories.add(category_obj)
+                Word(
+                    id=wordJSON['id'],
+                    word=wordJSON['word'],
+                    definition=wordJSON['definition'],
+                    translations=wordJSON['translations'],
+                    has_info=wordJSON['has_info'],
+                    miniature=miniature,
+                    examples=examples,
+                    explanations=explanations,
+                    story=story
+                ).save()
 
-                    # if user.partner_set.filter(slug=requested_slug).exists():
-                    #     # do some private stuff
-
-                    # if user in partner.user.all():
-                    #     #do something
-
-                    # Word(
-                    #     word=word,
-                    #     category=category_obj
-                    # ).save()
-
-            print('Successfully completed!')
+            console.info('Successfully completed!')
 
         except Exception as err:
-            raise SystemExit(err)
+            traceback.print_exc()
+            console.error('Process Failed!')
+            # raise SystemExit(err)

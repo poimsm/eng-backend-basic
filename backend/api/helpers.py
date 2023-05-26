@@ -54,3 +54,12 @@ def get_or_none(classmodel, **kwargs):
         return classmodel.objects.get(**kwargs)
     except classmodel.DoesNotExist:
         return None
+    
+def make_prefix(id):
+    if id < 10:
+        return f'000{id}'
+    if id >= 10 and id < 100:
+        return f'00{id}'
+    if id >= 100:
+        return f'0{id}'
+    return str(id)

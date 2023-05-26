@@ -5,7 +5,7 @@ services:
     container_name: eng_django
     volumes:
       - static:/static
-      - media:/app/media
+      # - media:/app/media
       - ./backend:/app
     env_file:
       - .env
@@ -23,7 +23,7 @@ services:
     build: ./nginx
     volumes:
       - static:/static
-      - media:/media
+      - ./media:/media
     ports:
       - "80:80"
     depends_on:

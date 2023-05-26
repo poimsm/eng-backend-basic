@@ -2,11 +2,7 @@ from rest_framework import serializers
 
 from users.models import User
 from api.models import (
-    UserSentence, Word, Question,
-    Example, Style, ShortVideo,
-    InfoCard, FavoriteResource,
-    Collocation, ResourceSentence,
-    ScreenFlow, UserProfile, Device,
+    Word, Question, UserProfile, Style, Device
 )
 
 
@@ -48,73 +44,17 @@ class QuestionFullSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class UserSentenceModelSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserSentence
-        fields = '__all__'
-
-
-class ExampleModelSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Example
-        fields = '__all__'
-
-
 class StyleModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Style
         fields = '__all__'
 
-
-class ShortVideoModelSerializer(serializers.ModelSerializer):
-
+class StylePresentationSerializer(serializers.ModelSerializer):
+    
     class Meta:
-        model = ShortVideo
-        fields = '__all__'
-
-
-class InfoCardModelSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = InfoCard
-        fields = '__all__'
-
-
-class FavoriteResourceModelSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = FavoriteResource
-        fields = '__all__'
-
-
-class CollocationModelSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Collocation
-        fields = '__all__'
-
-
-class ResourceSentenceModelSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = ResourceSentence
-        fields = '__all__'
-
-
-class ResourceSentenceDetailSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = ResourceSentence
-        fields = ['id', 'sentence', 'meaning', 'extras', 'type', 'origin']
-
-
-class ScreenFlowModelSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = ScreenFlow
-        fields = '__all__'
+        model = Style
+        fields = ['background_screen', 'background_challenge', 'question_opacity']
 
 
 class DeviceModelSerializer(serializers.ModelSerializer):

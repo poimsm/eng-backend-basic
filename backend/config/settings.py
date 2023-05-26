@@ -153,7 +153,7 @@ MEDIA_ROOT = '/media/'
 MEDIA_URL = 'media/'
 
 if(DEBUG):
-    SITE_DOMAIN = 'https://3e8e-190-208-155-6.sa.ngrok.io'
+    SITE_DOMAIN = 'https://ddb9-190-208-155-6.ngrok-free.app'
     API_VERSION = 'v1'
     BASE_URL = SITE_DOMAIN + '/api/' + API_VERSION
 else:
