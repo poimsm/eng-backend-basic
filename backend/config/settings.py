@@ -157,7 +157,7 @@ if(DEBUG):
     API_VERSION = 'v1'
     BASE_URL = SITE_DOMAIN + '/api/' + API_VERSION
 else:
-    SITE_DOMAIN = 'http://localhost'
+    SITE_DOMAIN = 'http://165.227.224.105'
     API_VERSION = 'v1'
     BASE_URL = SITE_DOMAIN + '/api/' + API_VERSION
 
