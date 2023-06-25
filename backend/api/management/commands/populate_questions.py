@@ -19,12 +19,14 @@ class Command(BaseCommand):
 
         try:
             console.info('Reading questions JSON file...')
-            questions = read_JSON_file('data/questions.json')            
+            questions = read_JSON_file('data/questions.json')
 
             console.info('Creating ' + str(len(questions)) + ' questions...')
 
             for q in questions:
-                difficultyDic = {
+                print('Populatin question ID: ' + str(q['id']))
+
+                difficulty_level = {
                     'easy': 0,
                     'moderate': 1,
                     'complex': 2,
@@ -32,17 +34,19 @@ class Command(BaseCommand):
 
                 media = settings.SITE_DOMAIN + '/media'
                 folder = 'questions/' + make_prefix(q['id'])
+                
 
-                exam_file = make_prefix(q['example']) + '.json'
-                example = read_JSON_file(f'data/examples/' + exam_file)
+                exam_dir = make_prefix(q['example'])
+                example = read_JSON_file(f'data/examples/' + exam_dir + '/index.json')
                 example['voice_url'] = f'{media}/{folder}/example.mp3'
 
                 Question(
                     id=q['id'],
                     question=q['question'],
                     voice_url=f'{media}/{folder}/voice.mp3',
-                    image_url=f'{media}/{folder}/image.jpg',
-                    difficulty=difficultyDic['easy'],
+                    image_url=f'{media}/{folder}/image.webp',
+                    difficulty=difficulty_level[q['difficulty']],
+                    type=q['type'],
                     example=example,
                 ).save()
 

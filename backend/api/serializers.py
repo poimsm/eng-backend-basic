@@ -2,7 +2,8 @@ from rest_framework import serializers
 
 from users.models import User
 from api.models import (
-    Word, Question, UserProfile, Style, Device
+    Word, Question, UserProfile, Style, Device,
+    ScreenFlow,
 )
 
 
@@ -62,3 +63,11 @@ class DeviceModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Device
         fields = '__all__'
+
+
+class ScreenFlowSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = ScreenFlow
+        fields = '__all__'
+

@@ -13,6 +13,10 @@ class Difficulty(models.IntegerChoices):
     MODERATE = 1, 'Moderate'
     COMPLEX = 2, 'Complex'
 
+class QuestionType(models.IntegerChoices):
+    QUIZ = 0, 'Quiz question'
+    DESCRIBE = 1, 'Describe the picture'
+
 
 class BaseModel(models.Model):
     id = models.AutoField(primary_key=True)
@@ -51,8 +55,12 @@ class Question(BaseModel):
     id = models.IntegerField(primary_key=True)
     question = models.TextField()
     difficulty = models.PositiveSmallIntegerField(
-        choices=Difficulty.choices,
-        default=Difficulty.EASY
+        null=False,
+        choices=Difficulty.choices
+    )
+    type = models.PositiveSmallIntegerField(
+        null=False,
+        choices=QuestionType.choices
     )
     image_url = models.TextField()
     voice_url = models.TextField()
@@ -95,7 +103,8 @@ class Device(BaseModel):
 
 
 class ScreenFlow(BaseModel):
-    type = models.CharField(max_length=50, blank=True, null=True)
+    value = models.CharField(max_length=50, blank=True, null=True)
+    time = models.CharField(max_length=50, blank=True, null=True)
     device = models.ForeignKey(
         Device,
         on_delete=models.CASCADE

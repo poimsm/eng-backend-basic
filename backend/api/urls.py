@@ -10,7 +10,10 @@ app_name = 'api'
 
 urlpatterns = [
     # @app public
-    re_path(r'questions\/?$', questions, name='questions'),
+    re_path(r'questions\/?$', questions),
+    re_path(r'screen-flow\/?$', screen_flow),
+    re_path(r'device\/?$', device),
+
     # re_path(r'library/short-video\/?$', library_short_video),
     # re_path(r'library/info-card\/?$', library_info_card),
     # re_path(r'activities/pack\/?$', activity_pack),
@@ -28,9 +31,9 @@ urlpatterns = [
     # re_path(r'library/user/info-card\/?$', user_info_card),
 
     # @authentication
-    re_path(r'user/sign-up\/?$', user_sign_up),
-    re_path(r'user/sign-in\/?$', user_sign_in),
-    re_path(r'user/data\/?$', user_data),
-    re_path(r'token/verify\/?$', TokenVerifyView.as_view()),
-    re_path(r'token/refresh\/?', TokenRefreshView.as_view()),
+    # re_path(r'user/sign-up\/?$', user_sign_up),
+    # re_path(r'user/sign-in\/?$', user_sign_in),
+    # re_path(r'user/data\/?$', user_data),
+    # re_path(r'token/verify\/?$', TokenVerifyView.as_view()),
+    # re_path(r'token/refresh\/?', TokenRefreshView.as_view()),
 ]

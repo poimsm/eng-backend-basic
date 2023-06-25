@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.conf import settings
+import os
 from os import listdir
 from os.path import isfile, join
 from api.helpers import console, read_JSON_file, make_prefix
@@ -8,6 +9,13 @@ import traceback
 from api.models import (
     Word
 )
+
+def list_subdirectories(directory):
+    subdirectories = []
+    for root, dirs, files in os.walk(directory):
+        for dir in dirs:
+            subdirectories.append(os.path.join(root, dir))
+    return subdirectories
 
 class Command(BaseCommand):
     help = 'Migrate words'
@@ -19,50 +27,65 @@ class Command(BaseCommand):
         console.info('--------------------------------')
         
         try:
-            word_dir = 'data/words'
-            word_file_names = [f for f in listdir(word_dir) if isfile(join(word_dir, f))]
+            # word_dir = 'data/words'
+            word_paths  = list_subdirectories('data/words')
+            # print(word_paths)
+            # return
+            # word_file_names = [f for f in listdir(word_dir) if isfile(join(word_dir, f))]
 
-            console.info(f'Reading {len(word_file_names)} words...')
+            console.info(f'Reading {len(word_paths)} words...')
             
-            for file_name in word_file_names:
-                wordJSON = read_JSON_file(f'{word_dir}/{file_name}')               
+            for path in word_paths:
+                id = int(path.split('/')[2])
+                print('Populatin word ID: ' + str(id))
 
-                folder = 'words/' + make_prefix(wordJSON['id'])
+                folder = 'words/' + path.split('/')[2]
                 media = f'{settings.SITE_DOMAIN}/media'
 
+                wordJSON = read_JSON_file(f'{path}/index.json')               
+                translations = read_JSON_file(f'{path}/word_translation.json')
+
                 miniature = wordJSON['miniature']
-                miniature['image_url'] = f"{media}/{folder}/mini.png"
+                miniature['image_url'] = f"{media}/{folder}/mini.jpg"
                 
                 examples = []
                 for i, ex in enumerate(wordJSON['examples']):
-                    exam = ex
-                    exam['voice_url'] = f'{media}/{folder}/ex_0{i + 1}.mp3'
-                    examples.append(exam)
+                    examples.append({
+                        'value': ex['value'],
+                        'voice_url': f'{media}/{folder}/ex_0{i + 1}.mp3',
+                        'translations': read_JSON_file(f'{path}/ex_translation_0{i+1}.json')
+                    })
 
-                explanations = []
-                for i, expl in enumerate(wordJSON['explanations']):
-                    explan = expl
-                    if 'image' in expl:
-                        explan['image'] = f"{media}/{folder}/ex_{expl['image']}"
-                    explanations.append(explan)
+                explanations = [{
+                    'image': None,
+                    'value': wordJSON['explanations'][0]['value'],
+                    'translations': read_JSON_file(f'{path}/explanation_translation.json')
+                }]              
 
-                story = None
-                if wordJSON['story']:
-                    story = wordJSON['story']
-                    story['voice_url']  = f'{media}/{folder}/story.mp3'
-                    story['image']      = f'{media}/{folder}/story.png'
-                    story['cover']      = f'{media}/{folder}/story_cover.png'
+                # explanations = []
+                # for i, expl in enumerate(wordJSON['explanations']):
+                #     explan = expl
+                #     if 'image' in expl:
+                #         explan['image'] = f"{media}/{folder}/ex_{expl['image']}"
+                #     explanations.append(explan)
+
+                # story = None
+                # if wordJSON['story']:
+                #     story = wordJSON['story']
+                #     story['voice_url']  = f'{media}/{folder}/story.mp3'
+                #     story['image']      = f'{media}/{folder}/story.jpg'
+                #     story['cover']      = f'{media}/{folder}/story_cover.jpg'
 
                 Word(
-                    id=wordJSON['id'],
+                    # id=wordJSON['id'],
+                    id=id,
                     word=wordJSON['word'],
                     definition=wordJSON['definition'],
-                    translations=wordJSON['translations'],
-                    has_info=wordJSON['has_info'],
+                    translations=translations,
                     miniature=miniature,
                     examples=examples,
                     explanations=explanations,
-                    story=story
+                    story=None
                 ).save()
 
             console.info('Successfully completed!')

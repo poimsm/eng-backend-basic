@@ -27,11 +27,14 @@ from django.db.models import Q
 # Data
 from api.constants import AppMsg
 
-# Models & serializers
+# Models
 from users.models import User
 from api.models import (
-    Word, Question, UserProfile, Style
+    Word, Question, UserProfile, Style,
+    QuestionType, Difficulty, Device
 )
+
+# Serializers
 from api.serializers import (
     QuestionModelSerializer,
     UserModelSerializer,
@@ -39,6 +42,7 @@ from api.serializers import (
     DeviceModelSerializer,
     WordModelSerializer,
     StylePresentationSerializer,
+    ScreenFlowSerializer,
 )
 from users.serializers import CustomTokenObtainPairSerializer
 
@@ -58,6 +62,9 @@ from nltk.stem.snowball import SnowballStemmer
 logger = logging.getLogger('api_v1')
 test_user_id = 1
 appMsg = AppMsg()
+
+
+langues = ['es', 'zh-Hans', 'pt', 'ar', 'hi']
 
 
 @api_view(['GET'])
@@ -151,10 +158,80 @@ def user_sign_up(request):
         return Response(appMsg.UNKNOWN_ERROR, status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(['POST'])
+def screen_flow(request):
+    serializer = ScreenFlowSerializer(data={
+        'device': request.data['device'],
+        'value': request.data['value'],
+        'time': request.data['time']
+    })
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+
+    return Response([], status=status.HTTP_201_CREATED)
+
+@api_view(['GET', 'POST'])
+def device(request):
+    if request.method == 'GET':
+        uuid = request.GET.get('uuid', None)
+
+        if not uuid:
+            return Response([], status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            device = Device.objects.get(uuid=uuid)
+            return Response({'device_id': device.id}, status=status.HTTP_200_OK)
+        except:
+            return Response({}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'POST':
+        uuid = request.data.get('uuid', None)
+
+        if not uuid:
+            return Response([], status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            device = Device.objects.get(uuid=uuid)
+            if device:
+                return Response({
+                    'message': 'Device already exists.'
+                }, status=status.HTTP_409_CONFLICT)
+        except:
+            pass
+        
+        serializer = DeviceModelSerializer(data={
+            'uuid': uuid,
+        })
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response({'device_id': serializer.data['id']}, status=status.HTTP_201_CREATED)
+
+
 @api_view(['GET'])
-def questions(request):
-    questions = list(Question.objects.all())
-    questions = random.sample(questions, 3)
+def questions(request):    
+    # questions = list(Question.objects.all())
+    # questions = random.sample(questions, 3)
+    # easy_questions = Question.objects.filter(
+    #     type=QuestionType.DESCRIBE,
+    #     difficulty=Difficulty.EASY,
+    # )
+    # questions.insert(0, random.choice(easy_questions))
+    
+    questions = Question.objects.filter(
+        # id__in=[11, 12, 13, 14, 15]
+        # id__in=[16, 17, 18, 19, 20]
+        # id__in=[21, 22, 23, 24, 25]
+        # id__in=[26, 27, 28, 29, 30]
+        # id__in=[1, 2, 3, 4, 5]
+        # id__in=[6, 7, 8, 9, 10]
+
+        id__in=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        # id__in=[11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    )
+
+    lang = request.GET.get('lang', None)
 
     result = []
     for q in questions:
@@ -165,17 +242,24 @@ def questions(request):
                 examples.append({
                     'value': ex['value'],
                     'voice_url': ex['voice_url'],
-                    'translation': get_translation(ex['translations'], 'Spanish'),
+                    'translation': get_translation(ex['translations'], lang),
                 })
+
+            explanations = [{
+                'image': w.explanations[0]['image'],
+                'value': w.explanations[0]['value'],
+                'translation': get_translation(w.explanations[0]['translations'], lang),
+                # 'translation': w.explanations[0]['translations']
+            }]
                 
             words.append({
                 'id': w.id,
                 'word': w.word,
                 'definition': w.definition,
-                'translation': get_translation(w.translations, 'Spanish'),
+                'translation': get_translation(w.translations, lang),
                 'has_info': w.has_info,
                 'examples': examples,
-                'explanations': w.explanations,
+                'explanations': explanations,
                 'story': w.story,
                 'miniature': w.miniature
             })
@@ -197,9 +281,10 @@ def questions(request):
 
 
 def get_translation(items, lang):
+    lang = 'es' if lang is None else lang
     result = ''
     for item in items:
         if item['lang'] == lang:
-            result = item['value']
+            result = item['text']
     return result
 
