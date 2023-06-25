@@ -27,8 +27,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = os.getenv('DEBUG')
-DEBUG = True
+DEBUG = os.getenv('DEBUG', False) == 'True'
 
 
 ALLOWED_HOSTS = ['*']
@@ -152,14 +151,13 @@ STATIC_URL = 'static/'
 MEDIA_ROOT = '/media/'
 MEDIA_URL = 'media/'
 
-if(DEBUG):
+if DEBUG == 'true':
     SITE_DOMAIN = 'https://d1a8f8f9c25f.ngrok.app'
-    API_VERSION = 'v1'
-    BASE_URL = SITE_DOMAIN + '/api/' + API_VERSION
 else:
     SITE_DOMAIN = 'http://165.227.224.105'
-    API_VERSION = 'v1'
-    BASE_URL = SITE_DOMAIN + '/api/' + API_VERSION
+
+API_VERSION = 'v1'
+BASE_URL = SITE_DOMAIN + '/api/' + API_VERSION
 
 
 # Default primary key field type

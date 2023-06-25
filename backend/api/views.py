@@ -7,7 +7,7 @@ import traceback
 from datetime import date
 import uuid
 from itertools import groupby
-
+import os
 
 # Framework
 from rest_framework.response import Response
@@ -158,6 +158,13 @@ def user_sign_up(request):
         return Response(appMsg.UNKNOWN_ERROR, status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(['GET'])
+def hola(request):
+
+    DEBUG = os.getenv('DEBUG', False) == 'False'
+    return Response({'DEBUG': DEBUG}, status=status.HTTP_200_OK)
+
+
 @api_view(['POST'])
 def screen_flow(request):
     serializer = ScreenFlowSerializer(data={
@@ -170,6 +177,7 @@ def screen_flow(request):
 
     return Response([], status=status.HTTP_201_CREATED)
 
+
 @api_view(['GET', 'POST'])
 def device(request):
     if request.method == 'GET':
@@ -177,7 +185,7 @@ def device(request):
 
         if not uuid:
             return Response([], status=status.HTTP_400_BAD_REQUEST)
-        
+
         try:
             device = Device.objects.get(uuid=uuid)
             return Response({'device_id': device.id}, status=status.HTTP_200_OK)
@@ -198,7 +206,7 @@ def device(request):
                 }, status=status.HTTP_409_CONFLICT)
         except:
             pass
-        
+
         serializer = DeviceModelSerializer(data={
             'uuid': uuid,
         })
@@ -210,7 +218,7 @@ def device(request):
 
 
 @api_view(['GET'])
-def questions(request):    
+def questions(request):
     # questions = list(Question.objects.all())
     # questions = random.sample(questions, 3)
     # easy_questions = Question.objects.filter(
@@ -218,7 +226,7 @@ def questions(request):
     #     difficulty=Difficulty.EASY,
     # )
     # questions.insert(0, random.choice(easy_questions))
-    
+
     questions = Question.objects.filter(
         # id__in=[11, 12, 13, 14, 15]
         # id__in=[16, 17, 18, 19, 20]
@@ -251,7 +259,7 @@ def questions(request):
                 'translation': get_translation(w.explanations[0]['translations'], lang),
                 # 'translation': w.explanations[0]['translations']
             }]
-                
+
             words.append({
                 'id': w.id,
                 'word': w.word,
@@ -264,7 +272,7 @@ def questions(request):
                 'miniature': w.miniature
             })
 
-        style = Style.objects.get(question=q.id)     
+        style = Style.objects.get(question=q.id)
 
         result.append({
             'id': q.id,
@@ -276,7 +284,6 @@ def questions(request):
             'style': StylePresentationSerializer(style).data
         })
 
-
     return Response(result)
 
 
@@ -287,4 +294,3 @@ def get_translation(items, lang):
         if item['lang'] == lang:
             result = item['text']
     return result
-

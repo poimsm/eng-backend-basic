@@ -13,6 +13,7 @@ class Difficulty(models.IntegerChoices):
     MODERATE = 1, 'Moderate'
     COMPLEX = 2, 'Complex'
 
+
 class QuestionType(models.IntegerChoices):
     QUIZ = 0, 'Quiz question'
     DESCRIBE = 1, 'Describe the picture'

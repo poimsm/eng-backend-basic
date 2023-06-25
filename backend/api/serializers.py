@@ -51,11 +51,13 @@ class StyleModelSerializer(serializers.ModelSerializer):
         model = Style
         fields = '__all__'
 
+
 class StylePresentationSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = Style
-        fields = ['background_screen', 'background_challenge', 'question_opacity']
+        fields = ['background_screen',
+                  'background_challenge', 'question_opacity']
 
 
 class DeviceModelSerializer(serializers.ModelSerializer):
@@ -66,8 +68,7 @@ class DeviceModelSerializer(serializers.ModelSerializer):
 
 
 class ScreenFlowSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = ScreenFlow
         fields = '__all__'
-
