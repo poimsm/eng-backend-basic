@@ -219,25 +219,25 @@ def device(request):
 
 @api_view(['GET'])
 def questions(request):
-    # questions = list(Question.objects.all())
-    # questions = random.sample(questions, 3)
-    # easy_questions = Question.objects.filter(
-    #     type=QuestionType.DESCRIBE,
-    #     difficulty=Difficulty.EASY,
-    # )
-    # questions.insert(0, random.choice(easy_questions))
-
-    questions = Question.objects.filter(
-        # id__in=[11, 12, 13, 14, 15]
-        # id__in=[16, 17, 18, 19, 20]
-        # id__in=[21, 22, 23, 24, 25]
-        # id__in=[26, 27, 28, 29, 30]
-        # id__in=[1, 2, 3, 4, 5]
-        # id__in=[6, 7, 8, 9, 10]
-
-        id__in=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        # id__in=[11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    questions = list(Question.objects.all())
+    questions = random.sample(questions, 3)
+    easy_questions = Question.objects.filter(
+        type=QuestionType.DESCRIBE,
+        difficulty=Difficulty.EASY,
     )
+    questions.insert(0, random.choice(easy_questions))
+
+    # questions = Question.objects.filter(
+    #     # id__in=[11, 12, 13, 14, 15]
+    #     # id__in=[16, 17, 18, 19, 20]
+    #     # id__in=[21, 22, 23, 24, 25]
+    #     # id__in=[26, 27, 28, 29, 30]
+    #     # id__in=[1, 2, 3, 4, 5]
+    #     # id__in=[6, 7, 8, 9, 10]
+
+    #     id__in=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    #     # id__in=[11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    # )
 
     lang = request.GET.get('lang', None)
 
