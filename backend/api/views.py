@@ -219,12 +219,14 @@ def device(request):
 
 @api_view(['GET'])
 def questions(request):
-    questions = list(Question.objects.all())
-    questions = random.sample(questions, 3)
+    
     easy_questions = Question.objects.filter(
         type=QuestionType.DESCRIBE,
         difficulty=Difficulty.EASY,
     )
+    easy_question = random.choice(easy_questions)
+    questions = list(Question.objects.exclude(id=easy_question.id))
+    questions = random.sample(questions, 3)    
     questions.insert(0, random.choice(easy_questions))
 
     # questions = Question.objects.filter(
