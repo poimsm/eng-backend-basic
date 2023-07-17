@@ -45,11 +45,41 @@ def global_config(request):
 
     # langues = ['es', 'zh-Hans', 'pt', 'ar', 'hi']
 
+    intro = [
+        {
+            "start": 0,
+            "value": "Hey there! Let's do this fun quiz, okay?"
+        },
+        {
+            "start": 2600,
+            "value": "You can answer it any way you like, and there's no wrong answer!"
+        },
+        {
+            "start": 6000,
+            "value": "Use your imagination and come up with super cool words!"
+        },
+        {
+            "start": 9300,
+            "value": "And, umm, you have to talk and talk without stopping"
+        },
+        {
+            "start": 12400,
+            "value": "Just keep going!"
+        },
+        {
+            "start": 13700,
+            "value": "It's gonna be so much fun, you'll see!"
+        }
+    ]
+
+    current_version = '1.0.2'
+
     data = {
         'mobile_app_verison': mobile_app_verison,
         'api_version': 'v1',
-        'update_required': False,
-        'languages': languages
+        'update_required': mobile_app_verison != current_version,
+        'languages': languages,
+        'intro': intro
     }
 
     return Response(data, status=status.HTTP_200_OK)

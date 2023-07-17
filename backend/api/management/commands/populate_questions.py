@@ -46,8 +46,10 @@ class Command(BaseCommand):
                     voice_url=f'{media}/{folder}/voice.mp3',
                     image_url=f'{media}/{folder}/image.webp',
                     difficulty=difficulty_level[q['difficulty']],
+                    notes=q['help'],
                     type=q['type'],
                     example=example,
+                    status= 1 if q['ready'] else 0
                 ).save()
 
                 question = Question.objects.get(id=q['id'])

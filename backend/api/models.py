@@ -17,6 +17,7 @@ class Difficulty(models.IntegerChoices):
 class QuestionType(models.IntegerChoices):
     QUIZ = 0, 'Quiz question'
     DESCRIBE = 1, 'Describe the picture'
+    STORY = 2, 'Build a story'
 
 
 class BaseModel(models.Model):
@@ -65,6 +66,7 @@ class Question(BaseModel):
     )
     image_url = models.TextField()
     voice_url = models.TextField()
+    notes = models.TextField(blank=True, null=True)
     example = models.JSONField()
     words = models.ManyToManyField(Word)
     objects = models.Manager()
@@ -92,6 +94,7 @@ class Style(BaseModel):
 
 class Device(BaseModel):
     uuid = models.CharField(max_length=50, blank=False, null=False)
+    notes = models.TextField(blank=True, null=True)
     user = models.ForeignKey(
         User,
         null=True,

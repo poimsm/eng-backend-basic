@@ -151,8 +151,8 @@ STATIC_URL = 'static/'
 MEDIA_ROOT = '/media/'
 MEDIA_URL = 'media/'
 
-if DEBUG == 'true':
-    SITE_DOMAIN = 'https://d1a8f8f9c25f.ngrok.app'
+if DEBUG:
+    SITE_DOMAIN = 'http://192.168.0.2'
 else:
     SITE_DOMAIN = 'http://165.227.224.105'
 

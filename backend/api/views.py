@@ -22,6 +22,7 @@ from rest_framework.serializers import ValidationError
 from django.db import transaction, IntegrityError
 from rest_framework.exceptions import AuthenticationFailed
 from django.db.models import Q
+from django.db.models import Case, When
 
 
 # Data
@@ -31,8 +32,10 @@ from api.constants import AppMsg
 from users.models import User
 from api.models import (
     Word, Question, UserProfile, Style,
-    QuestionType, Difficulty, Device
+    QuestionType, Difficulty, Device,
 )
+
+from api.models import Status as StatusModel
 
 # Serializers
 from api.serializers import (
@@ -220,14 +223,14 @@ def device(request):
 @api_view(['GET'])
 def questions(request):
     
-    easy_questions = Question.objects.filter(
-        type=QuestionType.DESCRIBE,
-        difficulty=Difficulty.EASY,
-    )
-    easy_question = random.choice(easy_questions)
-    questions = list(Question.objects.exclude(id=easy_question.id))
-    questions = random.sample(questions, 3)    
-    questions.insert(0, random.choice(easy_questions))
+    # easy_questions = Question.objects.filter(
+    #     type=QuestionType.DESCRIBE,
+    #     difficulty=Difficulty.EASY,
+    # )
+    # easy_question = random.choice(easy_questions)
+    # questions = list(Question.objects.exclude(id=easy_question.id))
+    # questions = random.sample(questions, 3)    
+    # questions.insert(0, random.choice(easy_questions))
 
     # questions = Question.objects.filter(
     #     # id__in=[11, 12, 13, 14, 15]
@@ -237,16 +240,53 @@ def questions(request):
     #     # id__in=[1, 2, 3, 4, 5]
     #     # id__in=[6, 7, 8, 9, 10]
 
-    #     id__in=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    #     # id__in=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     #     # id__in=[11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    #     id__in=[31, 32, 33, 34, 35, 36, 37, 38, 39]
     # )
+
+    # pk_list = [31, 32, 33, 34, 35, 36, 37, 38, 39]
+    # pk_list = [39, 35, 24, 30, 35, 36, 37, 38, 39]
+
+    first_time = request.GET.get('first_time', None)
+    pk_list = [39, 37, 24, 30]
+
+
+    if first_time == '1':
+        preserved = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(pk_list)])
+        questions = Question.objects.filter(pk__in=pk_list).order_by(preserved)
+    
+    else:
+        # easy_questions = Question.objects.filter(
+        #     type=QuestionType.DESCRIBE,
+        #     difficulty=Difficulty.EASY,
+        #     status=StatusModel.ACTIVE
+        # )
+        easy_questions = Question.objects.filter(
+            type=QuestionType.DESCRIBE,
+            status=StatusModel.ACTIVE
+        ).exclude(id__in=pk_list)
+        easy_question = random.choice(easy_questions)
+
+        quiz_questions = Question.objects.filter(
+            status=StatusModel.ACTIVE            
+        ).exclude(type=QuestionType.DESCRIBE).exclude(id__in=pk_list)
+        quiz_question = random.choice(quiz_questions)
+
+        ids = pk_list + [easy_question.id, quiz_question.id]
+        questions = list(Question.objects.filter(status=StatusModel.ACTIVE).exclude(id__in=ids))
+        questions = random.sample(questions, 2)
+        questions.insert(0, easy_question)
+        questions.insert(1, quiz_question)
+
+    
 
     lang = request.GET.get('lang', None)
 
     result = []
     for q in questions:
         words = []
-        for w in q.words.all():
+        for w in q.words.filter(status=StatusModel.ACTIVE):
             examples = []
             for ex in w.examples:
                 examples.append({

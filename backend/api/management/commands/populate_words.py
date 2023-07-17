@@ -85,7 +85,8 @@ class Command(BaseCommand):
                     miniature=miniature,
                     examples=examples,
                     explanations=explanations,
-                    story=None
+                    story=None,
+                    status= 1 if wordJSON['ready'] else 0
                 ).save()
 
             console.info('Successfully completed!')

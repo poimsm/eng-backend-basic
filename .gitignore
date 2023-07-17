@@ -141,3 +141,4 @@ GitHub.sublime-settings
 # Custom
 /backend/logs
 /backend/data
+/backend/models
