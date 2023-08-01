@@ -34,11 +34,22 @@ class Command(BaseCommand):
 
                 media = settings.SITE_DOMAIN + '/media'
                 folder = 'questions/' + make_prefix(q['id'])
-                
 
-                exam_dir = make_prefix(q['example'])
-                example = read_JSON_file(f'data/examples/' + exam_dir + '/index.json')
-                example['voice_url'] = f'{media}/{folder}/example.mp3'
+                example = {'empty': True}
+
+                if q['example']:
+                    exam_dir = make_prefix(q['example'])
+                    example = read_JSON_file(f'data/examples/' + exam_dir + '/index.json')
+                    example['voice_url'] = f'{media}/{folder}/example.mp3'
+
+                
+                scenario = {'empty': True}
+                # if q['type'] == 3:
+                #     exam_dir = make_prefix(q['example'])
+                #     for asd in asd:
+                #         scenario = read_JSON_file(f'data/examples/' + exam_dir + '/index.json')
+                #     scenario['voice_url'] = f'{media}/{folder}/example.mp3'
+                #     scenario['voice_url'] = f'{media}/{folder}/example.mp3'
 
                 Question(
                     id=q['id'],
@@ -49,6 +60,7 @@ class Command(BaseCommand):
                     notes=q['help'],
                     type=q['type'],
                     example=example,
+                    scenario=q.get('scenario', None),
                     status= 1 if q['ready'] else 0
                 ).save()
 

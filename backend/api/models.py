@@ -18,6 +18,7 @@ class QuestionType(models.IntegerChoices):
     QUIZ = 0, 'Quiz question'
     DESCRIBE = 1, 'Describe the picture'
     STORY = 2, 'Build a story'
+    SCENARIO = 3, 'Scenario'
 
 
 class BaseModel(models.Model):
@@ -65,9 +66,10 @@ class Question(BaseModel):
         choices=QuestionType.choices
     )
     image_url = models.TextField()
+    scenario = models.JSONField(blank=True, null=True)
     voice_url = models.TextField()
     notes = models.TextField(blank=True, null=True)
-    example = models.JSONField()
+    example = models.JSONField(blank=True, null=True)
     words = models.ManyToManyField(Word)
     objects = models.Manager()
 

@@ -223,36 +223,13 @@ def device(request):
 @api_view(['GET'])
 def questions(request):
     
-    # easy_questions = Question.objects.filter(
-    #     type=QuestionType.DESCRIBE,
-    #     difficulty=Difficulty.EASY,
-    # )
-    # easy_question = random.choice(easy_questions)
-    # questions = list(Question.objects.exclude(id=easy_question.id))
-    # questions = random.sample(questions, 3)    
-    # questions.insert(0, random.choice(easy_questions))
-
-    # questions = Question.objects.filter(
-    #     # id__in=[11, 12, 13, 14, 15]
-    #     # id__in=[16, 17, 18, 19, 20]
-    #     # id__in=[21, 22, 23, 24, 25]
-    #     # id__in=[26, 27, 28, 29, 30]
-    #     # id__in=[1, 2, 3, 4, 5]
-    #     # id__in=[6, 7, 8, 9, 10]
-
-    #     # id__in=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    #     # id__in=[11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-    #     id__in=[31, 32, 33, 34, 35, 36, 37, 38, 39]
-    # )
-
-    # pk_list = [31, 32, 33, 34, 35, 36, 37, 38, 39]
-    # pk_list = [39, 35, 24, 30, 35, 36, 37, 38, 39]
-
     first_time = request.GET.get('first_time', None)
-    pk_list = [39, 37, 24, 30]
+    # pk_list = [39, 37, 24, 30]
+    # pk_list = [39, 12, 24, 30]
+    pk_list = [40, 42, 43, 44, 45]
 
 
-    if first_time == '1':
+    if first_time != '1':
         preserved = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(pk_list)])
         questions = Question.objects.filter(pk__in=pk_list).order_by(preserved)
     
@@ -319,9 +296,11 @@ def questions(request):
         result.append({
             'id': q.id,
             'question': q.question,
+            'type': q.type,
             'image_url': q.image_url,
             'voice_url': q.voice_url,
             'example': q.example,
+            'scenario': q.scenario,
             'words': words,
             'style': StylePresentationSerializer(style).data
         })

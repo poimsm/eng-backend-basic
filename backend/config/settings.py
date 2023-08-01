@@ -152,7 +152,7 @@ MEDIA_ROOT = '/media/'
 MEDIA_URL = 'media/'
 
 if DEBUG:
-    SITE_DOMAIN = 'http://192.168.0.2'
+    SITE_DOMAIN = 'http://192.168.0.4'
 else:
     SITE_DOMAIN = 'http://165.227.224.105'
 
