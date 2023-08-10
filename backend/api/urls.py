@@ -14,6 +14,8 @@ urlpatterns = [
     re_path(r'screen-flow\/?$', screen_flow),
     re_path(r'device\/?$', device),
     re_path(r'hola\/?$', hola),
+    re_path(r'questions_config\/?$', set_questions_config),
+
 
     # re_path(r'library/short-video\/?$', library_short_video),
     # re_path(r'library/info-card\/?$', library_info_card),

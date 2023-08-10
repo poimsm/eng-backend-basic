@@ -33,6 +33,7 @@ from users.models import User
 from api.models import (
     Word, Question, UserProfile, Style,
     QuestionType, Difficulty, Device,
+    QuestionConfig,
 )
 
 from api.models import Status as StatusModel
@@ -220,20 +221,34 @@ def device(request):
         return Response({'device_id': serializer.data['id']}, status=status.HTTP_201_CREATED)
 
 
-@api_view(['GET'])
-def questions(request):
-    
-    first_time = request.GET.get('first_time', None)
-    # pk_list = [39, 37, 24, 30]
-    # pk_list = [39, 12, 24, 30]
-    pk_list = [40, 42, 43, 44, 45]
+def scenario_questions(first_time, config):
+    if config.questions_search == 'random':
+        questions = Question.objects.filter(
+            type=QuestionType.SCENARIO,
+            status=StatusModel.ACTIVE
+        )
+        return [random.choice(questions)]
+
+    if config.questions_search == 'hardcoded':
+        ids = config.ids.split(',')
+
+        questions = Question.objects.filter(
+            id__in=[int(x) for x in ids]
+        )
+        return [random.choice(questions)]
 
 
-    if first_time != '1':
-        preserved = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(pk_list)])
+def normal_questions(first_time, config):
+    if first_time:
+        preserved = Case(*[When(pk=pk, then=pos)
+                         for pos, pk in enumerate(pk_list)])
         questions = Question.objects.filter(pk__in=pk_list).order_by(preserved)
-    
-    else:
+        return questions
+
+    if config.questions_search == 'random':
+        # pk_list = [39, 12, 24, 30]
+        # pk_list = [40, 42, 43, 44, 45]
+        pk_list = [39, 37, 24, 30]
         # easy_questions = Question.objects.filter(
         #     type=QuestionType.DESCRIBE,
         #     difficulty=Difficulty.EASY,
@@ -246,17 +261,52 @@ def questions(request):
         easy_question = random.choice(easy_questions)
 
         quiz_questions = Question.objects.filter(
-            status=StatusModel.ACTIVE            
-        ).exclude(type=QuestionType.DESCRIBE).exclude(id__in=pk_list)
+            status=StatusModel.ACTIVE
+        ).exclude(type__in=[QuestionType.DESCRIBE, QuestionType.SCENARIO]).exclude(id__in=pk_list)
         quiz_question = random.choice(quiz_questions)
 
         ids = pk_list + [easy_question.id, quiz_question.id]
-        questions = list(Question.objects.filter(status=StatusModel.ACTIVE).exclude(id__in=ids))
-        questions = random.sample(questions, 2)
-        questions.insert(0, easy_question)
-        questions.insert(1, quiz_question)
+        whatever_questions = list(Question.objects.filter(status=StatusModel.ACTIVE).exclude(
+            id__in=ids).exclude(type=QuestionType.SCENARIO))
+        questions = [easy_question, quiz_question, random.choice(whatever_questions)]
+        # questions = random.sample(questions, 1)
+        # questions.insert(0, easy_question)
+        # questions.insert(1, quiz_question)
 
-    
+        return questions
+
+    if config.questions_search == 'hardcoded':
+        ids = config.ids.split(',')
+        ids = [int(x) for x in ids]
+        preserved = Case(*[When(id=id, then=pos)
+                         for pos, id in enumerate(ids)])
+        questions = Question.objects.filter(id__in=ids).order_by(preserved)
+        return questions
+
+
+def generate_questions(first_time, config):
+    if random.random() < 0.35:
+        return scenario_questions(first_time, config)
+    else:
+        return normal_questions(first_time, config)
+
+
+@api_view(['GET'])
+def questions(request):
+
+    # first_time = request.GET.get('first_time', None)
+    first_time = False
+
+    config = QuestionConfig.objects.all().first()
+
+    if config.questions_type == 'random':
+        questions = generate_questions(first_time, config)
+
+    if config.questions_type == 'normal':
+        questions = normal_questions(first_time, config)
+
+    if config.questions_type == 'scenario':
+        questions = scenario_questions(first_time, config)
 
     lang = request.GET.get('lang', None)
 
@@ -276,7 +326,6 @@ def questions(request):
                 'image': w.explanations[0]['image'],
                 'value': w.explanations[0]['value'],
                 'translation': get_translation(w.explanations[0]['translations'], lang),
-                # 'translation': w.explanations[0]['translations']
             }]
 
             words.append({
@@ -315,3 +364,23 @@ def get_translation(items, lang):
         if item['lang'] == lang:
             result = item['text']
     return result
+
+
+@api_view(['GET'])
+def set_questions_config(request):
+    ids = request.GET.get('ids', None)
+    questions_type = request.GET.get('questions_type', None)
+    questions_search = request.GET.get('questions_search', None)
+
+    question_config = QuestionConfig.objects.get()
+
+    if ids is not None:
+        question_config.ids = ids
+    if questions_type is not None:
+        question_config.questions_type = questions_type
+    if questions_search is not None:
+        question_config.questions_search = questions_search
+
+    question_config.save()
+
+    return Response('Coool!', status=status.HTTP_200_OK)

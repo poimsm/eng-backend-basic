@@ -147,3 +147,13 @@ class UserProfile(BaseModel):
 
     class Meta:
         db_table = 'user_profiles'
+
+
+class QuestionConfig(BaseModel):
+    questions_type = models.TextField(null=False, blank=False, default='random')
+    questions_search = models.TextField(null=False, blank=False, default='random')
+    ids = models.TextField(null=True, blank=True)
+    objects = models.Manager()
+
+    class Meta:
+        db_table = 'question_config'

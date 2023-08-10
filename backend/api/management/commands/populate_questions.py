@@ -35,7 +35,7 @@ class Command(BaseCommand):
                 media = settings.SITE_DOMAIN + '/media'
                 folder = 'questions/' + make_prefix(q['id'])
 
-                example = {'empty': True}
+                example = q.get('example', None)
 
                 if q['example']:
                     exam_dir = make_prefix(q['example'])
@@ -43,13 +43,26 @@ class Command(BaseCommand):
                     example['voice_url'] = f'{media}/{folder}/example.mp3'
 
                 
-                scenario = {'empty': True}
-                # if q['type'] == 3:
-                #     exam_dir = make_prefix(q['example'])
-                #     for asd in asd:
-                #         scenario = read_JSON_file(f'data/examples/' + exam_dir + '/index.json')
-                #     scenario['voice_url'] = f'{media}/{folder}/example.mp3'
-                #     scenario['voice_url'] = f'{media}/{folder}/example.mp3'
+                # scenario = {} if q['type'] == 3 else None
+                scenario = q.get('scenario', None)
+
+                if scenario:
+                    for i, part in enumerate(scenario['parts']):
+                        part_options = part.get('options', None)
+                        part_voice = part.get('voice_url', None)
+                        part_image = part.get('image_url', None)
+
+                        if part_image:
+                            scenario['parts'][i]['image_url'] =  f'{media}/{folder}/{part_image}'
+
+                        if part_voice:
+                            scenario['parts'][i]['voice_url'] =  f'{media}/{folder}/{part_voice}'
+
+                        if part_options:
+                            for j, opt in enumerate(part_options):
+                                opt_img = opt['image_url']
+                                if opt_img:
+                                    scenario['parts'][i]['options'][j]['image_url'] =  f'{media}/{folder}/{opt_img}'                
 
                 Question(
                     id=q['id'],
@@ -60,7 +73,7 @@ class Command(BaseCommand):
                     notes=q['help'],
                     type=q['type'],
                     example=example,
-                    scenario=q.get('scenario', None),
+                    scenario=scenario,
                     status= 1 if q['ready'] else 0
                 ).save()
 
